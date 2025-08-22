@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Convertidor de Texto - Neumorphism</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #e6e9f0;
+            --secondary: #ffffff;
+            --text: #4a5568;
+            --shadow-light: #ffffff;
+            --shadow-dark: #d1d9e6;
+            --accent: #6366f1;
+            --accent-hover: #4f46e5;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--primary);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            background: var(--primary);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 20px 20px 60px var(--shadow-dark),
+                        -20px -20px 60px var(--shadow-light);
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: var(--text);
+            font-weight: 600;
+        }
+
+        .text-area {
+            width: 100%;
+            min-height: 150px;
+            padding: 15px;
+            margin-bottom: 20px;
+            background: var(--primary);
+            border: none;
+            border-radius: 15px;
+            box-shadow: inset 5px 5px 10px var(--shadow-dark),
+                        inset -5px -5px 10px var(--shadow-light);
+            font-family: 'Poppins', sans-serif;
+            font-size: 16px;
+            color: var(--text);
+            resize: vertical;
+            outline: none;
+        }
+
+        .text-area:focus {
+            box-shadow: inset 5px 5px 10px var(--shadow-dark),
+                        inset -5px -5px 10px var(--shadow-light),
+                        0 0 0 2px var(--accent);
+        }
+
+        .buttons-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            padding: 12px 20px;
+            background: var(--primary);
+            border: none;
+            border-radius: 15px;
+            box-shadow: 5px 5px 10px var(--shadow-dark),
+                        -5px -5px 10px var(--shadow-light);
+            font-family: 'Poppins', sans-serif;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            color: var(--accent);
+        }
+
+        .btn:active {
+            box-shadow: inset 5px 5px 10px var(--shadow-dark),
+                        inset -5px -5px 10px var(--shadow-light);
+        }
+
+        .copy-btn {
+            display: flex;
+            justify-content: center;
+            margin-top: 15px;
+        }
+
+        .copy-btn .btn {
+            background: var(--accent);
+            color: white;
+            box-shadow: 5px 5px 10px rgba(99, 102, 241, 0.3),
+                        -5px -5px 10px rgba(255, 255, 255, 0.7);
+        }
+
+        .copy-btn .btn:hover {
+            background: var(--accent-hover);
+        }
+
+        .notification {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            background: var(--accent);
+            color: white;
+            border-radius: 10px;
+            box-shadow: 5px 5px 15px rgba(99, 102, 241, 0.3),
+                        -5px -5px 15px rgba(255, 255, 255, 0.7);
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
+        .notification.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        @media (max-width: 600px) {
+            .buttons-container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Convertidor de Texto</h1>
+        
+        <textarea id="inputText" class="text-area" placeholder="Introduce el texto que deseas convertir..."></textarea>
+        
+        <div class="buttons-container">
+            <button class="btn" onclick="mayusculasDespuesDePunto()">Mayúsculas después de punto</button>
+            <button class="btn" onclick="todoMayusculas()">Todo en Mayúsculas</button>
+            <button class="btn" onclick="todoMinusculas()">Todo en minúsculas</button>
+            <button class="btn" onclick="capitalizarTexto()">Capitalizar el Texto</button>
+            <button class="btn" onclick="capitalizarInteligente()">Capitalizar Inteligente</button>
+        </div>
+        
+        <textarea id="outputText" class="text-area" placeholder="El texto convertido aparecerá aquí..." readonly></textarea>
+        
+        <div class="copy-btn">
+            <button class="btn" onclick="copiarTexto()">Copiar Texto Convertido</button>
+        </div>
+    </div>
+    
+    <div id="notification" class="notification">¡Texto copiado al portapapeles!</div>
+
+    <script>
+        // Función para convertir a mayúsculas después de punto
+        function mayusculasDespuesDePunto() {
+            const input = document.getElementById('inputText').value;
+            if (!input) return;
+            
+            let result = input.toLowerCase();
+            result = result.replace(/\. +([a-z])/g, function(match, letter) {
+                return '. ' + letter.toUpperCase();
+            });
+            
+            // Asegurar que la primera letra sea mayúscula
+            if (result.length > 0) {
+                result = result.charAt(0).toUpperCase() + result.slice(1);
+            }
+            
+            document.getElementById('outputText').value = result;
+        }
+        
+        // Función para convertir todo a mayúsculas
+        function todoMayusculas() {
+            const input = document.getElementById('inputText').value;
+            if (!input) return;
+            
+            document.getElementById('outputText').value = input.toUpperCase();
+        }
+        
+        // Función para convertir todo a minúsculas
+        function todoMinusculas() {
+            const input = document.getElementById('inputText').value;
+            if (!input) return;
+            
+            document.getElementById('outputText').value = input.toLowerCase();
+        }
+        
+        // Función para capitalizar el texto
+        function capitalizarTexto() {
+            const input = document.getElementById('inputText').value;
+            if (!input) return;
+            
+            const result = input.replace(/\b\w+/g, function(word) {
+                return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+            });
+            
+            document.getElementById('outputText').value = result;
+        }
+        
+        // Función para capitalizar de manera inteligente
+        function capitalizarInteligente() {
+            const input = document.getElementById('inputText').value;
+            if (!input) return;
+            
+            // Palabras que no se capitalizan (artículos, preposiciones, etc.)
+            const minorWords = [
+                'a', 'ante', 'bajo', 'cabe', 'con', 'contra', 'de', 'desde', 'durante', 
+                'en', 'entre', 'hacia', 'hasta', 'mediante', 'para', 'por', 'según', 
+                'sin', 'so', 'sobre', 'tras', 'versus', 'vía', 'el', 'la', 'los', 'las',
+                'un', 'una', 'unos', 'unas', 'y', 'e', 'o', 'u', 'que', 'se', 'su'
+            ];
+            
+            const words = input.toLowerCase().split(' ');
+            let result = '';
+            
+            for (let i = 0; i < words.length; i++) {
+                let word = words[i];
+                
+                // Siempre capitalizar la primera palabra
+                if (i === 0) {
+                    word = word.charAt(0).toUpperCase() + word.slice(1);
+                } 
+                // Capitalizar palabras que no están en la lista de palabras menores
+                else if (!minorWords.includes(word)) {
+                    // Caso especial para IoT, AI, etc.
+                    if (word === 'iot') {
+                        word = 'IoT';
+                    } else if (word === 'ai') {
+                        word = 'AI';
+                    } else {
+                        word = word.charAt(0).toUpperCase() + word.slice(1);
+                    }
+                }
+                
+                result += (i > 0 ? ' ' : '') + word;
+            }
+            
+            document.getElementById('outputText').value = result;
+        }
+        
+        // Función para copiar el texto convertido
+        function copiarTexto() {
+            const outputText = document.getElementById('outputText');
+            if (!outputText.value) return;
+            
+            outputText.select();
+            document.execCommand('copy');
+            
+            // Mostrar notificación
+            const notification = document.getElementById('notification');
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
